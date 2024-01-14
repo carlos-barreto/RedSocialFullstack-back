@@ -22,12 +22,12 @@ export const verifyUserToken = (
 
     let dataToken = jwt.verify(token, process.env.SECRET_KEY!);
     if (!dataToken)
-      return res.json({ error: 'Token invalido, acceso denegado' });
+      return res.json({ status: false, error: 'Token invalido, acceso denegado' });
 
     req.body.data_token = dataToken;
     next();
   } catch (error) {
-    return res.json({ error: 'Sesión inválida' });
+    return res.json({ status: false, error: 'Sesión inválida' });
   }
 };
 

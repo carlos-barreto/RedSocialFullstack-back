@@ -1,5 +1,4 @@
 import { Schema, model, ObjectId } from 'mongoose';
-import { IRoles } from './roles';
 
 export interface IUser {
   // _id?                 : ObjectId,
@@ -8,21 +7,11 @@ export interface IUser {
   email: string;
   firstAccess: Date;
   lastAccess: Date;
-  roles: [IRoles];
   password: string;
-  courses?: number;
-  _tenantId: ObjectId;
 
   // Identificacion perfil de usuario
-  tipo_usuario?: String; // Puedes ser Profesor o Estudiante
+  tipo_usuario?: String; // Puedes ser admin o user
   admin?: boolean;
-
-  componentes_utilizados?: number;
-
-  // Configruacion pra alertas
-  tiempo_desconexion: number;
-  duracion_alerta: number;
-  fecha_inicio_alertas: Date;
 
   auth: string;
   failedLoginCount: number;
@@ -38,35 +27,18 @@ const userSchema = new Schema<IUser>(
     email: String,
     firstAccess: Date,
     lastAccess: Date,
-    roles: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Roles',
-      },
-    ],
-    courses: Number,
     password: String,
-    _tenantId: Schema.Types.ObjectId,
 
     // Identificacion perfil de usuario
     tipo_usuario: {
       type: String,
-      default: 'docente',
-      enum: ['docente', 'estudiante'],
+      default: 'user',
+      enum: ['user', 'admin'],
     },
     admin: {
       type: Boolean,
       default: false,
     },
-
-    tiempo_desconexion: Number,
-    duracion_alerta: Number,
-    fecha_inicio_alertas: {
-      type: Date,
-      default: Date.now,
-    },
-
-    componentes_utilizados: Number,
 
     auth: {
       type: String,

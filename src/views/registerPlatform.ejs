@@ -6,89 +6,15 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
               integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx"
               crossorigin="anonymous">
-        <title>LTI 1.3 LabInnova</title>
+        <title>API BACK</title>
     </head>
     <body class='bg-light'>
         <div class='my-3 p-5'>
-            <h1 class='display-4 text-center '>LTI 1.3 LabInnova</h1>
-            <p class="mb-5 text-center ">A continuación, podrá registrar la plataforma LSM en la base de datos de
-                LabInnova con el fin de poder hacer uso del mismo como una herramienta externa.</p>
-            <div class='container-fluid'>
-                <form id="formRegisterPlatform">
-                    <div class="mb-3">
-                        <label for="inputClientId" class="form-label">ID del cliente</label>
-                        <input type="text" class="form-control" id="inputClientId" aria-describedby="clientIdHelp">
-                        <div id="clientIdHelp" class="form-text">Corresponde al ID que brinda Moodle para registrar la
-                            plataforma LTI.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="InputNamePlatform" class="form-label">Nombre de la plataforma</label>
-                        <input type="text" class="form-control" id="InputNamePlatform"
-                               aria-describedby="namePlatformHelp">
-                        <div id="namePlatformHelp" class="form-text">Corresponde al nombre de la plataforma.</div>
-                    </div>
-                    <button id="registerPlatform" class="btn btn-success">Registrar plataforma</button>
-                </form>
-                <div id="platformRegisterDiv"></div>
-            </div>
-            <hr/>
-            <div class='text-center'>
-                <p>Adicionalmente, debe incluir la llave pública en el registro de la plataforma en moodle.</p>
-                <div class="form-group mb-3">
-                    <label for="InputNamePlatformPK" class="form-label">Nombre de la plataforma</label>
-                    <input type="text" class="form-control " id="InputNamePlatformPK"
-                           aria-describedby="namePlatformHelpPK">
-                    <div id="namePlatformHelpPK" class="form-text">Corresponde al nombre de la plataforma para la cual
-                        generar la llave pública. .
-                    </div>
-                </div>
-                <button id='get-key' class='btn bg-warning'>Obtener llave publica</button>
-            </div>
-            <div class='text-center card mb-5 mt-5'>
-                <h6 class='card-header my-1'>Tú llave pública</h6>
-                <p class="my-1 mb-2" id='public-key'>¡Presione el botón 'Obtener llave pública' para generar la
-                    llave!</p>
-            </div>
-        </div>
+            <h1 class='display-4 text-center '>API BACK</h1>
+        
         <!-- JavaScript Bundle with Popper -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
                 integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
                 crossorigin="anonymous"></script>
     </body>
-    <script>
-        document.getElementById('get-key').addEventListener('click', async () => {
-            let namePlatform = document.getElementById('InputNamePlatformPK').value;
-            fetch(`http://localhost:3000/api/platform/publickey/${namePlatform}`)
-                .then(function (response) {
-                    return response.json();
-                }).then(res => {
-                document.getElementById('public-key').innerHTML = res.data;
-            }).catch(err => {
-                console.error(`Error: ${err}`);
-            });
-        });
-
-        document.getElementById('formRegisterPlatform').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            let idClient = document.getElementById('inputClientId').value;
-            let namePlatform = document.getElementById('InputNamePlatform').value;
-
-            fetch('http://localhost:3000/api/platform/registerPlatform', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({'clientId': idClient, 'namePlatform': namePlatform})
-            })
-                .then(response => response.json())
-                .catch(error => {
-                    document.getElementById('platformRegisterDiv').innerHTML = `ERROR: ${error}`;
-                }).then(response => {
-                document.getElementById('platformRegisterDiv').innerHTML = `${response.data}`;
-            });
-
-        });
-    </script>
 </html>

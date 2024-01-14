@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { IRoles, RolesModel } from "../models/roles";
 import { UserModel } from "../models/user";
 
 import jwt from "jsonwebtoken";
+var bcrypt = require("bcryptjs");
+
 
 export const isLogged = async (req: Request, res: Response) => {
   try {
@@ -13,7 +14,6 @@ export const isLogged = async (req: Request, res: Response) => {
       .populate([
         {
           path: "roles",
-          model: RolesModel,
           select: "name",
         },
       ]);
@@ -26,11 +26,9 @@ export const isLogged = async (req: Request, res: Response) => {
     }
 
     // Identificar si el usuario es administrador o no
-    if (usuario.roles.find((r: IRoles) => r.name == process.env.ROL_ADMIN)) {
-      usuario.admin = true;
-    } else {
-      usuario.admin = false;
-    }
+
+    usuario.admin = false;
+
 
     return res.json({
       status: true,
@@ -47,48 +45,87 @@ export const isLogged = async (req: Request, res: Response) => {
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
-    const { id, correo } = req.body;
+    const { email, password } = req.body;
+    console.log(email, password);
 
-    const usuario = await UserModel.findOne({ _id: id, email: correo })
-      .select("_id email firstName lastName tipo_usuario admin")
-      .populate([
-        {
-          path: "roles",
-          model: RolesModel,
-          select: "name",
-        },
-      ]);
+    UserModel.findOne({
+      email: email,
+    })
+      .exec((err, user) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
+        //SE VALIDA EL USUARIO
+        if (!user) {
+          return res.status(404).send({ message: "Usuario o Contraseña errada." });
+        }
 
-    if (!usuario) {
-      return res.json({
-        status: false,
-        mensaje: "Datos de usuario incorrectos",
+        var passwordIsValid = bcrypt.compareSync(
+          req.body.password,
+          user.password
+        );
+          //SE VALIDA LA CONTRASEÑA
+        if (!passwordIsValid) {
+          return res.status(401).send({ message: "Contraseña o Usuario errada." });
+        }
+
+        const token = jwt.sign(
+          {
+            id: user._id,
+            nombres: user.firstName,
+            apellidos: user.lastName,
+            correo: user.email,
+            admin: user.admin,
+          },
+          process.env.SECRET_KEY!
+
+        );
+
+        return res.status(200).send({
+          status: true,
+          id: user._id,
+          username: user.firstName,
+          email: user.email,
+          token,
+        });
       });
-    }
 
-    // Identificar si el usuario es administrador o no
-    if (usuario.roles.find((r: IRoles) => r.name == process.env.ROL_ADMIN)) {
-      usuario.admin = true;
-    } else {
-      usuario.admin = false;
-    }
-
-    const token = jwt.sign(
-      {
-        id: usuario._id,
-        nombres: usuario.firstName,
-        apellidos: usuario.lastName,
-        correo: usuario.email,
-        admin: usuario.admin,
-      },
-      process.env.SECRET_KEY!
-    );
-
+  } catch (error) {
+    console.log(error);
     return res.json({
-      status: true,
-      usuario: usuario,
-      token,
+      status: false,
+      error: "Ocurrió un error al iniciar la sesión del usuario",
     });
+  }
+};
+
+
+export const registerUser = async (req: Request, res: Response) => {
+  try {
+
+    const user = new UserModel({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      firstAccess: '12/01/2024 10:35',
+      password: bcrypt.hashSync(req.body.password, 8),
+      // Identificacion perfil de usuario
+      tipo_usuario: 'user',// Puedes ser admin o user
+      auth: "register",
+      failedLoginCount: 0,
+      idNumber: Math.floor((Math.random() * 100) + 1),
+      _isDeleted: false,
+    });
+
+    user.save((err, user) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+    });
+    res.send({ message: "Usuario registrado!", "user": user });
+
   } catch (error) {
     console.log(error);
     return res.json({

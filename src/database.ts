@@ -1,5 +1,4 @@
-// import { connect } from "mongoose";
-import mongoose from "mongoose";
+import { connect } from "mongoose";
 /**
  * @titulo connectDB
  * @descricion Realiza la conexión a la base de datos teniendo en cuenta las varibles de entorno configuradas
@@ -18,10 +17,8 @@ export const connectDB = async () => {
       useUnifiedTopology: true,
       dbName: `${process.env.DB_NAME}`,
     };
-    await mongoose
-      .connect(uri!, setupConect)
-      .then((res: any) => {
-        console.log(res);
+    await connect(uri!, setupConect)
+      .then((res: any) => {        
         console.log("Conectado a la base de datos");
         console.log("\x1b[32m%s\x1b[0m", "  👍 - BASE DE DATOS CONECTADA");
       })

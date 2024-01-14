@@ -1,20 +1,14 @@
-import express, { Application, json, urlencoded } from "express";
+import express, { Application, json, urlencoded, static as static_ } from "express";
 import cors from "cors";
 import morgan from "morgan";
-
 import { config } from "dotenv";
 config();
-
 import { connectDB } from "./database";
 import { apiRoutes } from "./routes/index.routes";
 import { createServer, Server } from "http";
-
-// Integración LTI
-import { connection } from "mongoose";
 const session = require("express-session");
-const MongoStore = require("connect-mongodb-session")(session);
-
 const app: Application = express();
+const path = require('path');
 
 app.use(json());
 app.use(express.text());
@@ -32,11 +26,11 @@ app.use(
     secure: true,
     ephemeral: true,
     httpOnly: true,
-    store: new MongoStore({ mongooseConnection: connection }),
   })
 );
 
 app.use("/api", apiRoutes);
+app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
 

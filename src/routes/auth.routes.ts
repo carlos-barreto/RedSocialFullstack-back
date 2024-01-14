@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { verifyUserToken } from '../middleware/auth';
-import { isLogged, loginUser } from '../controllers/auth.controller';
+import { isLogged, loginUser, registerUser } from '../controllers/auth.controller';
 
 export const autenticacionRoutes = Router();
 
@@ -9,3 +9,6 @@ autenticacionRoutes.get('/is_logged', verifyUserToken, isLogged);
 
 // VERIFICAR USUARIO Y RETORNARLE UN TOKEN
 autenticacionRoutes.post('/login', loginUser);
+
+// REGISTRAR UN USUARIO
+autenticacionRoutes.post('/register', registerUser);

@@ -14,6 +14,10 @@ publicationsRoutes.post(
 );
 publicationsRoutes.get(
   '/all',
-  // verifyUserToken,
+  verifyUserToken,
+  getPublications
+);
+publicationsRoutes.get(
+  '/all/public',  
   getPublications
 );

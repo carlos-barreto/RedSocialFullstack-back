@@ -73,7 +73,82 @@ export const publications = async (req: Request, res: Response) => {
 
 export const getPublications = async (req: Request, res: Response) => {
 
-    const publications = await PublicationsModel.find();
+    const publications = await PublicationsModel.aggregate([                
+        {
+            $lookup: {
+                from: "users",  
+                localField: "user",
+                foreignField: "_id",
+                as: "usuario"
+            }
+        },        
+        {   //se realiza un agregate para llamar los datos del usuario creador
+            $project: {
+                "_id": 0,
+                "userName": "$usuario.firstName",
+                "userEmail": "$usuario.email",
+                "title":1,
+                "description":1,
+                "user":1,
+                "image":1,
+                "like":1,
+                "createdBy":1,
+                "directory":1,
+                "filename":1,
+                "isDirectory":1,
+                "path":1,
+                "createdAt": {
+                    //se formatea la fecha ej: July 17, 2018
+                    $concat: [
+                        {
+                            $substr: [
+                                "$createdAt",
+                                5,
+                                2
+                            ]
+                        },
+                        "-",
+                        {
+                            $switch: {
+                                branches: [
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "01"] }, then: "January" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "02"] }, then: "February" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "03"] }, then: "March" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "04"] }, then: "April" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "05"] }, then: "May" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "06"] }, then: "June" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "07"] }, then: "July" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "08"] }, then: "August" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "09"] }, then: "September" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "10"] }, then: "October" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "11"] }, then: "November" },
+                                    { case: { $eq: [{ $substr: ["$createdAt", 5, 2] }, "12"] }, then: "December" },
+                                ],
+                                default: ""
+                            }
+                        },
+                        " ",
+                        {
+                            $substr: [
+                                "$createdAt",
+                                8,
+                                2
+                            ]
+                        },
+                        ", ",
+                        {
+                            $substr: [
+                                "$createdAt",
+                                0,
+                                4
+                            ]
+                        }
+                    ]
+                }
+
+            }
+        }
+    ]);
 
     return res.json({
         status: true,
